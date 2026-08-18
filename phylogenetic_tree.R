@@ -84,7 +84,34 @@ orthogroups_long_named <- orthogroups_long %>%
   mutate(Name = if_else(is.na(Name), "OG0000023", Name))
 
 
+# original heatmap
+heatmap <- ggplot(orthogroups_long_named, aes(x = ID, y = sample, fill = factor(presence))) +
+  geom_tile(color = "white") +
+  scale_fill_manual(values = c("0" = "white", "1" = "pink")) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  labs(fill = "Presence") +
+  scale_y_discrete(labels = orthogroups_long_named$Name)
 
+
+
+# reorder
+
+orthogroup_order <- read_csv("orthogroup_order.csv")
+
+orthogroups_long_named <- left_join(
+  orthogroups_long_named,
+  orthogroup_order,
+  by = c("sample" = "Orthogroup_Identity")
+)
+
+orthogroups_long_named <- orthogroups_long_named %>%
+  arrange(Order) %>%
+  mutate(
+    sample = factor(sample, levels = unique(sample))
+  )
 
 # heatmap
 heatmap <- ggplot(orthogroups_long_named, aes(x = ID, y = sample, fill = factor(presence))) +
@@ -97,10 +124,27 @@ heatmap <- ggplot(orthogroups_long_named, aes(x = ID, y = sample, fill = factor(
   labs(fill = "Presence") +
   scale_y_discrete(labels = orthogroups_long_named$Name)
   
+heatmap_ordered <- ggplot(
+  orthogroups_long_named,
+  aes(x = ID, y = sample, fill = factor(presence))
+) +
+  geom_tile(color = "white") +
+  scale_fill_manual(values = c("0" = "white", "1" = "pink")) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  labs(fill = "Presence") +
+  scale_y_discrete(
+    labels = setNames(
+      orthogroups_long_named$Name,
+      orthogroups_long_named$sample
+    )
+  )
 
-heatmap
+heatmap_ordered
 
-ggsave("heatmap.svg", heatmap)
+ggsave("heatmap.svg", heatmap_ordered)
 
 
 
