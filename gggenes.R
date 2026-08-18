@@ -151,6 +151,8 @@ ggsave("filtered_merged_gggenes.pdf", filtered_merged_gggenes, height=50, width=
 filtered_even_more <- filtered_merged_rc_final %>%
    filter(molecule=="8054" | molecule=="8158" | molecule =="lizard_adv_2" | molecule == "barthadenovirus_zootocae" | molecule == "bearded_dragon_adv_1" | molecule == "deer_adv_A" | molecule == "tern_adv_1" | molecule == "barthadenovirus_varani" | molecule =="psittacine_adv_3")
 
+lengths <- data.frame(names=c("8054","8158","lizard_adv_2","barthadenovirus_zootocae","bearded_dragon_adv_1","deer_adv_A","tern_adv_1","barthadenovirus_varani","psittacine_adv_3"), lengths=c(37517,37535,32965,35082,35275,30666,31334,37597,31735))
+
 
 
 ggplot(filtered_even_more, aes(xmin=start, xmax=end, y=new_name, fill= gene)) +
@@ -168,24 +170,30 @@ ggsave("filtered_even_more_plot.pdf", width = 7, height = 11, units="in")
 ggsave("filtered_even_more_plot.svg", width = 7, height = 11, units="in")
 
 
+new_df<- left_join(filtered_even_more,lengths, by=c("molecule"="names"))
 
-filtered_22_orthogroups <- filtered_even_more %>%
-  filter(gene%in%c("SPIKE","CAP6","CAPSP","CAP3","PKG3","TERM","DPOL","SHUT","DNB2","PRO","CAPSH","CAP8","PKG1","E43","NP","RH1","E41","E42","LH3","L2MU","P32K","UXP","LH2"))
-
-ggplot(filtered_22_orthogroups, aes(xmin=start, xmax=end, y=new_name, fill= gene)) +
-  geom_gene_arrow(aes(forward = strand == "+"),arrowhead_height = unit(0.25,"in")) +
-  facet_wrap(~ new_name, scales = "free",ncol=1) +
+ggplot(new_df, aes(xmin=start, xmax=end, y=new_name, fill= gene)) +
+  geom_gene_arrow(aes(forward = strand == "+"),arrowhead_height = unit(0.25,"in")) + facet_wrap(~ new_name, scales = "free", ncol = 1) +
+  theme_bw() +
   theme(axis.title.y = element_blank()) +
   xlim(0,40000) +
   theme(
     axis.text.y = element_blank(),  # Removes the text numbers
-    axis.ticks.y = element_blank()  # Removes the small tick lines
-  )
+    axis.ticks.y = element_blank(),  # Removes the small tick lines
+  ) +
+  geom_segment(
+    aes(
+      x = 0,
+      xend = lengths,
+      y = new_name,
+      yend = new_name
+    ),
+    inherit.aes = FALSE,
+    linewidth = 0.7,
+    position = position_nudge(y = -0.45)
+  ) 
 
 
-ggsave("filtered_22_orthogroups.pdf", width = 7, height = 11, units="in")
+ggsave("plot_with_lengths.pdf", width = 7, height = 13, units="in")
 
-ggsave("filtered_22_orthogroups.svg", width = 7, height = 11, units="in")
-
-
-         
+ggsave("plot_with_lengths_v2.svg", width = 7, height = 13, units="in")
