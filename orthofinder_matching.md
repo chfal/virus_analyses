@@ -95,3 +95,35 @@ keep {
 }
 ' seq_to_og.txt normalized.fasta
 ```
+
+So now we have all the fastas together grouped but because they are not aligned we need to align them to each other:
+
+```
+#!/bin/bash
+#SBATCH --partition=p_ccib_1
+#SBATCH --account=general
+#SBATCH --exclude=gpuc001,gpuc002
+#SBATCH --job-name=masce_10
+#SBATCH --mem=20G
+#SBATCH -n 15
+#SBATCH -N 1
+#SBATCH --time=7-00:00:00
+#SBATCH --requeue
+#SBATCH --mail-user=chf29@scarletmail.rutgers.edu
+#SBATCH --mail-type=FAIL,END,REQUEUE
+
+
+
+module purge
+module load java
+
+for fasta in *.fasta; do
+    base="${fasta%.fasta}"
+
+    java -jar macse_v2.07.jar \
+        -prog alignSequences \
+        -seq "$fasta" \
+        -out_NT "${base}_nt_aligned.fasta" \
+        -out_AA "${base}_aa_aligned.fasta"
+done
+```
