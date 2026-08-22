@@ -171,5 +171,32 @@ done
 finally: absrel
 
 ```
+#!/bin/bash
+#SBATCH --partition=p_geneva_1
+#SBATCH --exclude=gpuc001,gpuc002
+#SBATCH --job-name=iqtree
+#SBATCH --mem=10G
+#SBATCH -n 10
+#SBATCH -N 1
+#SBATCH --time=3-00:00:00
+#SBATCH --requeue
+#SBATCH --mail-user=chf29@scarletmail.rutgers.edu
+#SBATCH --mail-type=FAIL
 
+module purge
+eval "$(conda shell.bash hook)"
+conda activate hyphy
+
+
+mkdir -p absrel_results
+
+for file in *_nt_cleaned.fasta; do
+    base="${file%.fasta}"
+
+    hyphy absrel \
+        --alignment "$file" \
+        --tree "${base}.treefile" \
+        --output "absrel_results/${base}.json" \
+        | tee -a "absrel_results/${base}.log"
+done
 ```
