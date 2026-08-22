@@ -1,4 +1,5 @@
-Okay so we had to do some kind of weird awk/bash stuff to get this to work.
+
+Okay so we had our orthogroups in protein format and then we tried to run OrthoFinder in DNA sequence mode but it made totally different orthogroups, likely due to the fact that the genetic code is redundant and all that. So we basically had to make the same orthogroups from the nucleotide sequences by hand using the OrthoFinder output and the nucleotide sequences. ChatGPT was used for this because although I could have done it in R that would have required a lot of parsing so I just did this since it was faster.
 
 First we concatenated all the VGAS nucleotide into one large fasta file.
 
@@ -201,10 +202,10 @@ for file in *_nt_cleaned.fasta; do
 done
 ```
 
-
+# but wait!
 # realigning (chakras) once again
 
-but then i forgot with cristatellus we actually redid the alignments using another version of macse so i just did that really quickly
+I forgot with cristatellus we actually redid the alignments using another version of macse so I just did that really quickly.
 
 ```
 #!/bin/bash
@@ -245,6 +246,8 @@ done
 
 And then we do IQTREE / ABSREL
 
+iqtree: 
+
 ```
 #!/bin/bash
 #SBATCH --partition=p_geneva_1
@@ -274,6 +277,7 @@ done
 
 
 Absrel: 
+
 ```
 #!/bin/bash
 #SBATCH --partition=p_geneva_1
@@ -306,9 +310,7 @@ done
 
 ```
 
-
 We ran OpenRDP on only the alignments that passed macse alfix because the plain alignments from macse were not working as they had lots of question marks / kind of were bad alignments. This makes a bunch of .csv files I truly have no clue how to parse.
-
 
 ```
 for file in *_cleaned.aln; do
