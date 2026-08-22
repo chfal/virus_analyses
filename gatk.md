@@ -354,3 +354,30 @@ gatk HaplotypeCaller \
 --sample-ploidy 1 \
 -RF NotDuplicateReadFilter
 ```
+
+No snps/indels were in this afterwards which means that all the reads are in agreement with each sequence.
+
+We then actually redid the GATK pipeline by running the 8054/8158 reads mapped to the wrong assembly to see if we could call variants and we called 41 of them.
+
+```
+
+gatk HaplotypeCaller --native-pair-hmm-threads 2 -I merged_8158.addRG.marked.bam -O 8054_fasta_mapped_to_8158_reads.g.vcf.gz -R 8054.fasta -ERC BP_RESOLUTION --output-mode EMIT_ALL_CONFIDENT_SITES --max-reads-per-alignment-start 0 --sample-ploidy 1 -RF NotDuplicateReadFilter
+
+gatk HaplotypeCaller --native-pair-hmm-threads 2 -I merged_8054.addRG.marked.bam -O 8158_fasta_mapped_to_8054_reads.g.vcf.gz -R 8158.fasta -ERC BP_RESOLUTION --output-mode EMIT_ALL_CONFIDENT_SITES --max-reads-per-alignment-start 0 --sample-ploidy 1 -RF NotDuplicateReadFilter
+
+
+gatk GenotypeGVCFs -R 8158.fasta -V 8158_fasta_mapped_to_8054_reads.g.vcf.gz -O 8158_fasta_mapped_to_8054_reads.genotype.g.vcf.gz -all-sites TRUE
+
+gatk GenotypeGVCFs -R 8054.fasta -V 8054_fasta_mapped_to_8158_reads.g.vcf.gz -O 8054_fasta_mapped_to_8158_reads.genotype.g.vcf.gz -all-sites TRUE
+
+
+gatk SelectVariants -R 8054.fasta -V 8054_fasta_mapped_to_8158_reads.genotype.g.vcf.gz --select-type-to-include SNP -O 8054_fasta_mapped_to_8158.snps.vcf.gz
+gatk SelectVariants -R 8054.fasta -V 8054_fasta_mapped_to_8158_reads.genotype.g.vcf.gz --select-type-to-include INDEL -O 8054_fasta_mapped_to_8158.indels.vcf.gz
+
+
+gatk SelectVariants -R 8158.fasta -V 8158_fasta_mapped_to_8054_reads.genotype.g.vcf.gz --select-type-to-include SNP -O 8158_fasta_mapped_to_80545_reads.snps.vcf.gz
+gatk SelectVariants -R 8158.fasta -V 8158_fasta_mapped_to_8054_reads.genotype.g.vcf.gz --select-type-to-include INDEL -O 8158_fasta_mapped_to_80545_reads.indelsvcf.gz
+
+
+
+```
