@@ -200,3 +200,52 @@ for file in *_nt_cleaned.fasta; do
         | tee -a "absrel_results/${base}.log"
 done
 ```
+
+
+# realigning (chakras) once again
+
+but then i forgot with cristatellus we actually redid the alignments using another version of macse so i just did that really quickly
+
+```
+#!/bin/bash
+#SBATCH --partition=p_geneva_1                    # which partition to run the job, options are in the Amarel guide
+#SBATCH --exclude=gpuc001,gpuc002               # exclude CCIB GPUs
+#SBATCH --job-name=macse_alfix                      # job name for listing in queue
+#SBATCH --mem=10G                              # memory to allocate in Mb
+#SBATCH -n 1                                   # number of cores to use
+#SBATCH -N 1                                    # number of nodes the cores should be on, 1 means all cores on same node
+#SBATCH --cpus-per-task=24
+#SBATCH --time=3-00:00:00                         # maximum run time days-hours:minutes:seconds
+#SBATCH --requeue                               # restart and paused or superseeded jobs
+#SBATCH --mail-user=chf29@scarletmail.rutgers.edu           # email address to send status updates
+#SBATCH --mail-type=FAIL,END,REQUEUE      # email for the following reasons
+
+
+module purge
+module load apptainer/1.2.5-sg1509
+
+# Had to run it like this otheriwse it wouldnt find the files needed for the pipeline to work
+
+for fasta in *.fasta; do
+    base="${fasta%.fasta}"
+
+    echo "Processing $fasta..."
+
+    apptainer run \
+        --bind /projects/f_geneva_1/chfal:/projects/f_geneva_1/chfal \
+        --pwd /projects/f_geneva_1/chfal/virus_analyses/genes/orthogroup_nucleotides \
+        MACSE_ALFIX_v01.sif \
+        --out_dir . \
+        --out_file_prefix "${base}_aligned" \
+        --in_seq_file "$fasta"
+done
+
+
+```
+
+And then we do IQTREE / ABSREL
+
+```
+
+
+```
