@@ -127,3 +127,49 @@ for fasta in *.fasta; do
         -out_AA "${base}_aa_aligned.fasta"
 done
 ```
+
+Now lets play this game where we remove stop codons from the alignments
+
+```
+ for file in *.fasta; do     base=$(basename "$file" .fasta)
+    ./hyphy CleanStopCodons.bf <<EOF$file
+${base}_cleaned.fasta
+EOF
+ done
+
+```
+
+Then we will do iqtree. we are running this without any premonition of what is in the foreground or the background.
+
+
+```
+#!/bin/bash
+#SBATCH --partition=p_geneva_1
+#SBATCH --exclude=gpuc001,gpuc002
+#SBATCH --job-name=iqtree
+#SBATCH --mem=10G
+#SBATCH -n 10
+#SBATCH -N 1
+#SBATCH --time=06:00:00
+#SBATCH --requeue
+#SBATCH --mail-user=chf29@scarletmail.rutgers.edu
+#SBATCH --mail-type=FAIL
+
+
+module purge
+eval "$(conda shell.bash hook)"
+conda activate iqtree
+
+
+
+for file in *nt_cleaned.fasta; do
+    base="${file%.fasta}"
+    iqtree -s "$file" -m MFP -bb 1000 -alrt 1000 -pre "$base"
+done
+```
+
+finally: absrel
+
+```
+
+```
