@@ -246,6 +246,74 @@ done
 And then we do IQTREE / ABSREL
 
 ```
+#!/bin/bash
+#SBATCH --partition=p_geneva_1
+#SBATCH --exclude=gpuc001,gpuc002
+#SBATCH --job-name=iqtree
+#SBATCH --mem=10G
+#SBATCH -n 10
+#SBATCH -N 1
+#SBATCH --time=06:00:00
+#SBATCH --requeue
+#SBATCH --mail-user=chf29@scarletmail.rutgers.edu
+#SBATCH --mail-type=FAIL
 
+
+module purge
+eval "$(conda shell.bash hook)"
+conda activate iqtree
+
+
+
+for file in *aln; do
+    base="${file%.aln}"
+    iqtree -s "$file" -m MFP -bb 1000 -alrt 1000 -pre "$base"
+done
+
+```
+
+
+Absrel: 
+```
+#!/bin/bash
+#SBATCH --partition=p_geneva_1
+#SBATCH --exclude=gpuc001,gpuc002
+#SBATCH --job-name=iqtree
+#SBATCH --mem=10G
+#SBATCH -n 10
+#SBATCH -N 1
+#SBATCH --time=3-00:00:00
+#SBATCH --requeue
+#SBATCH --mail-user=chf29@scarletmail.rutgers.edu
+#SBATCH --mail-type=FAIL
+
+module purge
+eval "$(conda shell.bash hook)"
+conda activate hyphy
+
+
+mkdir -p absrel_results
+
+for file in *NT_cleaned.aln; do
+    base="${file%.aln}"
+
+    hyphy absrel \
+        --alignment "$file" \
+        --tree "${base}.treefile" \
+        --output "absrel_results/${base}.json" \
+        | tee -a "absrel_results/${base}.log"
+done
+
+```
+
+
+We ran OpenRDP on only the alignments that passed macse alfix because the plain alignments from macse were not working as they had lots of question marks / kind of were bad alignments. This makes a bunch of .csv files I truly have no clue how to parse.
+
+
+```
+for file in *_cleaned.aln; do
+    base="${file%_cleaned.aln}"
+    openrdp "$file" -m rdp -o "${base}_RDP.csv"
+done
 
 ```
