@@ -1,0 +1,27 @@
+```
+# Enter data
+data <- data.frame(
+  rate = c(1.898, 1.488, 1.095, 1.031, 0.789, 0.783,
+           0.751, 0.750, 0.734, 0.661, 0.548, 0.471),
+  positive_selection = c(0.050847, 0, 0.070423, 0.130435,
+                         0.02439, 0.231884, 0.039216, 0,
+                         0.035088, 0, 0.050847, 0.292308)
+)
+
+# Run linear model
+model <- lm(positive_selection ~ rate, data = data)
+
+# Model summary
+summary(model)
+
+# Confidence intervals
+confint(model)
+
+# Plot
+plot(data$rate, data$positive_selection,
+     xlab = "Evolutionary rate",
+     ylab = "Proportion of branches under positive selection",
+     pch = 19)
+
+abline(model, lwd = 2)
+```
